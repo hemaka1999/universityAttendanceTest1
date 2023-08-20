@@ -98,7 +98,7 @@ class _SignInScreenState extends State<SignInScreen> {
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () async {
-                  await _signIn(_email, _password);
+                  await _signIn(_email.trim(), _password);
                 },
 
                 child: const Text('Sign In'),

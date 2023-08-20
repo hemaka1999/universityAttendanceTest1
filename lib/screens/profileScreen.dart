@@ -3,6 +3,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:profile5/screens/QRCodeScreen.dart';
+import 'package:profile5/screens/attendanceHistoryScreen.dart';
 import 'dart:io';
 
 import 'package:profile5/screens/signIn.dart';
@@ -29,7 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => SignInScreen()),
+      MaterialPageRoute(builder: (context) => const SignInScreen()),
     );
   }
 
@@ -38,7 +40,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     if (_userId.isNotEmpty) {
-      FirebaseFirestore.instance.collection('users').doc(_userId).get().then((docSnapshot) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(_userId)
+          .get()
+          .then((docSnapshot) {
         if (docSnapshot.exists) {
           setState(() {
             _firstName = docSnapshot['firstName'];
@@ -50,7 +56,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       });
 
-      final storageRef = FirebaseStorage.instance.ref().child('profile_pictures').child(_userId).child('user_image.jpg');
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_pictures')
+          .child(_userId)
+          .child('user_image.jpg');
       storageRef.getDownloadURL().then((url) {
         setState(() {
           _profilePictureUrl = url;
@@ -119,63 +129,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 1,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code),
+            label: 'QR Code',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'History',
+          ),
+        ],
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (_) => const QrCodeScreen()));
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const AttendanceHistoryScreen()));
+          }
+        },
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: _isEditing ? _pickImage : null,
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: _newProfileImage != null
-                    ? FileImage(File(_newProfileImage!.path)) as ImageProvider<Object>?
-                    : (_profilePictureUrl.isNotEmpty
-                    ? NetworkImage(_profilePictureUrl)
-                    : const AssetImage('assets/default_profile_picture.png')) as ImageProvider<Object>?,
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: _isEditing ? _pickImage : null,
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundImage: _newProfileImage != null
+                      ? FileImage(File(_newProfileImage!.path))
+                          as ImageProvider<Object>?
+                      : (_profilePictureUrl.isNotEmpty
+                              ? NetworkImage(_profilePictureUrl)
+                              : const AssetImage(
+                                  'assets/default_profile_picture.png'))
+                          as ImageProvider<Object>?,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            if (_isEditing)
-              TextFormField(
-                initialValue: _firstName,
-                decoration: const InputDecoration(labelText: 'First Name'),
-                onChanged: (value) => setState(() => _firstName = value),
-              )
-            else
-              Text('Name: $_firstName $_lastName'),
-            const SizedBox(height: 8),
-            if (_isEditing)
-              TextFormField(
-                initialValue: _lastName,
-                decoration: const InputDecoration(labelText: 'Last Name'),
-                onChanged: (value) => setState(() => _lastName = value),
-              ),
-            const SizedBox(height: 8),
-            Text('Registration Number: $_registrationNumber'),
-            const SizedBox(height: 8),
-            Text('Email: $_email'),
-            const SizedBox(height: 8),
-            if (_isEditing)
-              TextFormField(
-                initialValue: _phoneNumber,
-                decoration: const InputDecoration(labelText: 'Phone Number'),
-                onChanged: (value) => setState(() => _phoneNumber = value),
-              )
-            else
-              Text('Phone Number: $_phoneNumber'),
-            const SizedBox(height: 16),
-            if (_isEditing)
-              ElevatedButton(
-                onPressed: _saveChanges,
-                child: const Text('Save Changes'),
-              ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _logout, // Add this line to trigger logout
-              child: const Text('Logout'),
-            ),
-          ],
+              const SizedBox(height: 16),
+              if (_isEditing)
+                TextFormField(
+                  initialValue: _firstName,
+                  decoration: const InputDecoration(labelText: 'First Name'),
+                  onChanged: (value) => setState(() => _firstName = value),
+                )
+              else
+                Text('Name: $_firstName $_lastName'),
+              const SizedBox(height: 8),
+              if (_isEditing)
+                TextFormField(
+                  initialValue: _lastName,
+                  decoration: const InputDecoration(labelText: 'Last Name'),
+                  onChanged: (value) => setState(() => _lastName = value),
+                ),
+              const SizedBox(height: 8),
+              Text('Registration Number: $_registrationNumber'),
+              const SizedBox(height: 8),
+              Text('Email: $_email'),
+              const SizedBox(height: 8),
+              if (_isEditing)
+                TextFormField(
+                  initialValue: _phoneNumber,
+                  decoration: const InputDecoration(labelText: 'Phone Number'),
+                  onChanged: (value) => setState(() => _phoneNumber = value),
+                )
+              else
+                Text('Phone Number: $_phoneNumber'),
+              const SizedBox(height: 16),
+              if (_isEditing)
+                ElevatedButton(
+                  onPressed: _saveChanges,
+                  child: const Text('Save Changes'),
+                ),
+              const SizedBox(height: 16),
+              if (!_isEditing) // Render logout button only when not editing
+                ElevatedButton(
+                  onPressed: _logout, // Add this line to trigger logout
+                  child: const Text('Logout'),
+                ),
+            ],
+          ),
         ),
       ),
     );
