@@ -30,41 +30,44 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
     super.dispose();
   }
 
-  void _markAttendance(String userId, String lectureId) {
-    if (attendanceMarked) return; // Check if attendance is already marked
+  void _markAttendance(String userId, String subjectId, String lectureId) {
+    if (attendanceMarked) return;
 
     CollectionReference attendanceCollection =
-    FirebaseFirestore.instance.collection('attendance');
+    FirebaseFirestore.instance
+        .collection('subjects')
+        .doc(subjectId)
+        .collection('lectures')
+        .doc(lectureId)
+        .collection('attendance');
 
-    // Create a unique document ID for the attendance using userId and lectureId
-    String documentId = '$userId-$lectureId';
+    String documentId = userId;
 
-    // Check if the attendance has already been marked
     attendanceCollection.doc(documentId).get().then((DocumentSnapshot snapshot) {
       if (!snapshot.exists) {
-        // If no attendance entry exists, mark attendance
         attendanceCollection.doc(documentId).set({
-          'userId': userId,
           'attended': true,
-          'lectureId': lectureId,
           'timestamp': FieldValue.serverTimestamp(),
         }).then((value) {
           print('Attendance marked successfully');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Attendance marked successfully')),
           );
-          attendanceMarked = true; // Mark attendance as already marked
+          setState(() {
+            attendanceMarked = true;
+          });
           controller.toggleFlash();
           controller.pauseCamera();
         }).catchError((error) {
           print('Error marking attendance: $error');
         });
       } else {
-        // Attendance already marked
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Attendance already marked')),
         );
-        attendanceMarked = true; // Mark attendance as already marked
+        setState(() {
+          attendanceMarked = true;
+        });
         controller.toggleFlash();
         controller.pauseCamera();
       }
@@ -84,7 +87,7 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const AttendanceHistoryScreen(),
+                  builder: (context) => AttendanceHistoryScreen(),
                 ),
               );
             },
@@ -116,7 +119,7 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (_) => const AttendanceHistoryScreen()));
+                    builder: (_) => AttendanceHistoryScreen()));
           }
         },
       ),
@@ -129,8 +132,12 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
               onQRViewCreated: (controller) {
                 this.controller = controller;
                 controller.scannedDataStream.listen((scanData) {
-                  // Call the function to store attendance data
-                  _markAttendance(userId, scanData.code!);
+                  List<String> qrData = scanData.code!.split('-');
+                  if (qrData.length == 2) {
+                    String subjectId = qrData[0];
+                    String lectureId = qrData[1];
+                    _markAttendance(userId, subjectId, lectureId);
+                  }
                 });
               },
             ),
@@ -151,3 +158,5 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
     );
   }
 }
+
+

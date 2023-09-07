@@ -153,7 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (_) => const AttendanceHistoryScreen()));
+                    builder: (_) => AttendanceHistoryScreen()));
           }
         },
       ),

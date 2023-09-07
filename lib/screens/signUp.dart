@@ -14,10 +14,14 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  // Define a list of options for the dropdown
+  List<String> departments = ['Department A', 'Department B', 'Department C'];
+  String? selectedDepartment; // Store the selected department
   final _formKey = GlobalKey<FormState>();
   String _firstName = '';
   String _lastName = '';
   String _email = '';
+  String _department = '';
   String _registrationNumber = '';
   String _phoneNumber = '';
   String _password = '';
@@ -49,6 +53,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               'profilePictureUrl': imageUrl,
               'firstName': _firstName,
               'lastName': _lastName,
+              'department': _department,
               'email': _email,
               'registrationNumber': _registrationNumber,
               'phoneNumber': _phoneNumber,
@@ -126,6 +131,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   return null;
                 },
                 onChanged: (value) => _email = value,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Department'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your department';
+                  }
+                  return null;
+                },
+                onChanged: (value) => _department = value,
               ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Registration Number'),
