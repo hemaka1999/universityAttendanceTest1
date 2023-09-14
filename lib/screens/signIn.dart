@@ -1,16 +1,27 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:profile5/screens/profileScreen.dart';
 import 'package:profile5/screens/signUp.dart';
+import 'dart:developer';
+import 'package:profile5/jwtoken/jwtoken.dart';
+
+import '../apicalling/http.dart';
+
+
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
+
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  final apiService = ApiService();
+  final tokenjwt = TokenJWT();
   final _formKey = GlobalKey<FormState>();
   String _email = '';
   String _password = '';
@@ -19,10 +30,25 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> _signIn(String email, String password) async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+        // await FirebaseAuth.instance.signInWithEmailAndPassword(
+        //   email: email,
+        //   password: password,
+        //   );
+
+        // Example POST request
+        final data = {'email': email, 'password': password};
+        final postResponse = await apiService.post('/auth/signin',null, data: data);
+        if (postResponse.statusCode == 200) {
+          final responseData = postResponse.data;
+          // final decodedData = jsonDecode(responseData); // Convert to a Map
+          // final jsonString = jsonEncode(decodedData); // Convert Map to JSON string
+          // print(jsonString); // Log the JSON string
+          tokenjwt.storeCurrentUser(responseData);
+          // Process the response data
+        } else {
+          // Handle errors
+        }
+
 
         // Navigate to the profile screen after successful sign-in
         Navigator.pushReplacement(
@@ -33,14 +59,8 @@ class _SignInScreenState extends State<SignInScreen> {
         // Successful sign-in, navigate to the next screen
         // For example:
         // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found') {
-          // Handle user not found error
-        } else if (e.code == 'wrong-password') {
-          // Handle wrong password error
-        } else {
-          // Handle other errors
-        }
+      }  catch (e) {
+        log(e.toString());
       } catch (error) {
         // Handle generic error
       }

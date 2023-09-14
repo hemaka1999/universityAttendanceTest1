@@ -36,6 +36,8 @@ dependencies:
   qr_code_scanner: ^1.0.1
   curved_navigation_bar: ^1.0.3
   intl: ^0.18.1
+  dio: ^4.0.0
+  shared_preferences: ^2.0.12
   flutter:
     sdk: flutter
 

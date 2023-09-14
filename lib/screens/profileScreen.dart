@@ -1,13 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:profile5/screens/QRCodeScreen.dart';
 import 'package:profile5/screens/attendanceHistoryScreen.dart';
-import 'dart:io';
-
+import 'package:image_picker/image_picker.dart';
 import 'package:profile5/screens/signIn.dart';
+
+import '../apicalling/http.dart';
+import '../jwtoken/jwtoken.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -17,18 +17,17 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final apiService = ApiService();
+  final tokenjwt = TokenJWT();
   String _userId = '';
-  String _profilePictureUrl = '';
-  String _firstName = '';
-  String _lastName = '';
+  String _name = '';
   String _email = '';
+  String _department = '';
   String _registrationNumber = '';
-  String _phoneNumber = '';
   bool _isEditing = false;
   XFile? _newProfileImage;
 
   void _logout() async {
-    await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const SignInScreen()),
@@ -38,36 +37,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    if (_userId.isNotEmpty) {
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(_userId)
-          .get()
-          .then((docSnapshot) {
-        if (docSnapshot.exists) {
-          setState(() {
-            _firstName = docSnapshot['firstName'];
-            _lastName = docSnapshot['lastName'];
-            _email = docSnapshot['email'];
-            _registrationNumber = docSnapshot['registrationNumber'];
-            _phoneNumber = docSnapshot['phoneNumber'];
-          });
-        }
-      });
+    fetchData(); // Fetch data when the screen initializes
+  }
 
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_pictures')
-          .child(_userId)
-          .child('user_image.jpg');
-      storageRef.getDownloadURL().then((url) {
-        setState(() {
-          _profilePictureUrl = url;
-        });
-      }).catchError((error) {
-        print("Error fetching profile picture: $error");
-      });
+  Future<void> fetchData() async {
+    try {
+      final currentUser = await tokenjwt.getCurrentUser();
+      if (currentUser != null) {
+        final postResponse = await apiService.get('/user/profile', currentUser['token']);
+        if (postResponse.statusCode == 200) {
+          final responseData = postResponse.data['user'];
+          setState(() {
+            _name = responseData['full_name'];
+            _email = responseData['email'];
+            _department = responseData['department'];
+            _registrationNumber = responseData['reg_no'];
+          });
+        } else {
+          // Handle API error
+          // You can display an error message or take appropriate action here
+        }
+      }
+    } catch (e) {
+      // Handle exceptions
+      // You can display an error message or take appropriate action here
     }
   }
 
@@ -78,42 +71,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _saveChanges() async {
-    final userRef = FirebaseFirestore.instance.collection('users').doc(_userId);
-
     if (_isEditing) {
-      await userRef.update({
-        'firstName': _firstName,
-        'lastName': _lastName,
-        'phoneNumber': _phoneNumber,
-      });
 
-      if (_newProfileImage != null) {
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('profile_pictures')
-            .child(_userId)
-            .child('user_image.jpg');
+        final currentUser = await tokenjwt.getCurrentUser();
+        final data = {
+          'full_name': _name,
+          'email': _email,
+          'department': _department,
+          'reg_no': _registrationNumber,
+        };
 
-        final imageFile = File(_newProfileImage!.path);
-        await storageRef.putFile(imageFile);
+        final postResponse = await apiService.put('/user/profile', currentUser?['token'],data:  data);
+        print(postResponse);
 
-        final imageUrl = await storageRef.getDownloadURL();
-        setState(() {
-          _profilePictureUrl = imageUrl;
-        });
-      }
-    }
+        if (postResponse.statusCode == 200) {
+          final responseData = postResponse.data['user'];
+          log(responseData);
+          _name = responseData['full_name'];
+          _email = responseData['email'];
+          _department = responseData['department'];
+          _registrationNumber = responseData['reg_no'];
+          _toggleEditing();
+        } else {
+          // Handle API error
+          // You can display an error message or take appropriate action here
+        }
 
-    _toggleEditing();
-  }
-
-  void _pickImage() async {
-    final picker = ImagePicker();
-    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
-      setState(() {
-        _newProfileImage = pickedImage;
-      });
     }
   }
 
@@ -163,59 +146,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              GestureDetector(
-                onTap: _isEditing ? _pickImage : null,
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundImage: _newProfileImage != null
-                      ? FileImage(File(_newProfileImage!.path))
-                          as ImageProvider<Object>?
-                      : (_profilePictureUrl.isNotEmpty
-                              ? NetworkImage(_profilePictureUrl)
-                              : const AssetImage(
-                                  'assets/default_profile_picture.png'))
-                          as ImageProvider<Object>?,
-                ),
-              ),
               const SizedBox(height: 16),
               if (_isEditing)
                 TextFormField(
-                  initialValue: _firstName,
-                  decoration: const InputDecoration(labelText: 'First Name'),
-                  onChanged: (value) => setState(() => _firstName = value),
+                  initialValue: _name,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                  onChanged: (value) => setState(() => _name = value),
                 )
               else
-                Text('Name: $_firstName $_lastName'),
+                Text('Name: $_name'),
               const SizedBox(height: 8),
               if (_isEditing)
                 TextFormField(
-                  initialValue: _lastName,
-                  decoration: const InputDecoration(labelText: 'Last Name'),
-                  onChanged: (value) => setState(() => _lastName = value),
-                ),
-              const SizedBox(height: 8),
-              Text('Registration Number: $_registrationNumber'),
-              const SizedBox(height: 8),
-              Text('Email: $_email'),
+                  initialValue: _registrationNumber,
+                  decoration: const InputDecoration(labelText: 'Registration Number'),
+                  onChanged: (value) => setState(() => _registrationNumber = value),
+                )
+              else
+                Text('Registration Number: $_registrationNumber'),
               const SizedBox(height: 8),
               if (_isEditing)
                 TextFormField(
-                  initialValue: _phoneNumber,
-                  decoration: const InputDecoration(labelText: 'Phone Number'),
-                  onChanged: (value) => setState(() => _phoneNumber = value),
+                  initialValue: _email,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  onChanged: (value) => setState(() => _email = value),
                 )
               else
-                Text('Phone Number: $_phoneNumber'),
+                Text('Email: $_email'),
+              const SizedBox(height: 8),
+              if (_isEditing)
+                TextFormField(
+                  initialValue: _department,
+                  decoration: const InputDecoration(labelText: 'Department'),
+                  onChanged: (value) => setState(() => _department = value),
+                )
+              else
+                Text('Department: $_department'),
               const SizedBox(height: 16),
               if (_isEditing)
                 ElevatedButton(
-                  onPressed: _saveChanges,
+                  onPressed:(){
+                    _saveChanges();
+                  },
                   child: const Text('Save Changes'),
                 ),
               const SizedBox(height: 16),
-              if (!_isEditing) // Render logout button only when not editing
+              if (!_isEditing)
                 ElevatedButton(
-                  onPressed: _logout, // Add this line to trigger logout
+                  onPressed: _logout,
                   child: const Text('Logout'),
                 ),
             ],
