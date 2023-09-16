@@ -38,12 +38,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       try {
 
+        final storage = FirebaseStorage.instance;
+        final storageRef = storage.ref();
+        final userImageRef = storageRef.child('user_images/$_email.jpg');
+
+        if (_selectedImage != null) {
+          await userImageRef.putFile(File(_selectedImage!.path));
+        }
+
+        final imageUrl = await userImageRef.getDownloadURL();
+        print(imageUrl);
+
 
         // full_name, email, password, department, reg_no
 
 
         // Example POST request
-        final data = {'full_name':_name, 'email': _email, 'password': _password, 'department':_department, 'reg_no':_registrationNumber };
+        final data = {'full_name':_name, 'email': _email, 'password': _password, 'department':_department, 'reg_no':_registrationNumber, 'avatar': imageUrl, };
         final postResponse = await apiService.post('/auth/signup',null, data: data);
         if (postResponse.statusCode == 201) {
           final responseData = postResponse.data;
@@ -120,8 +131,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               _selectedImage != null
                   ? Image.file(File(_selectedImage!.path))
                   : Container(),
+
               TextFormField(
-                decoration: const InputDecoration(labelText: 'First Name'),
+                decoration: const InputDecoration(labelText: 'Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your first name';
