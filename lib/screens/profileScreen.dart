@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:profile5/screens/QRCodeScreen.dart';
 import 'package:profile5/screens/attendanceHistoryScreen.dart';
@@ -10,7 +8,9 @@ import '../apicalling/http.dart';
 import '../jwtoken/jwtoken.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -25,6 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _department = '';
   String _registrationNumber = '';
   bool _isEditing = false;
+  String? profilePictureURL;
   XFile? _newProfileImage;
 
   void _logout() async {
@@ -37,14 +38,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    fetchData(); // Fetch data when the screen initializes
+    fetchData();
   }
 
   Future<void> fetchData() async {
     try {
       final currentUser = await tokenjwt.getCurrentUser();
       if (currentUser != null) {
-        final postResponse = await apiService.get('/user/profile', currentUser['token']);
+        final postResponse =
+        await apiService.get('/user/profile', currentUser['token']);
         if (postResponse.statusCode == 200) {
           final responseData = postResponse.data['user'];
           setState(() {
@@ -52,15 +54,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _email = responseData['email'];
             _department = responseData['department'];
             _registrationNumber = responseData['reg_no'];
+            profilePictureURL = responseData['avatar'];
           });
         } else {
           // Handle API error
-          // You can display an error message or take appropriate action here
         }
       }
     } catch (e) {
       // Handle exceptions
-      // You can display an error message or take appropriate action here
     }
   }
 
@@ -72,31 +73,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _saveChanges() async {
     if (_isEditing) {
+      final currentUser = await tokenjwt.getCurrentUser();
+      final data = {
+        'full_name': _name,
+        'email': _email,
+        'department': _department,
+        'reg_no': _registrationNumber,
+        'avatar': profilePictureURL,
+      };
 
-        final currentUser = await tokenjwt.getCurrentUser();
-        final data = {
-          'full_name': _name,
-          'email': _email,
-          'department': _department,
-          'reg_no': _registrationNumber,
-        };
+      final postResponse =
+      await apiService.put('/user/profile', currentUser?['token'], data: data);
 
-        final postResponse = await apiService.put('/user/profile', currentUser?['token'],data:  data);
-        print(postResponse);
-
-        if (postResponse.statusCode == 200) {
-          final responseData = postResponse.data['user'];
-          log(responseData);
-          _name = responseData['full_name'];
-          _email = responseData['email'];
-          _department = responseData['department'];
-          _registrationNumber = responseData['reg_no'];
-          _toggleEditing();
-        } else {
-          // Handle API error
-          // You can display an error message or take appropriate action here
-        }
-
+      if (postResponse.statusCode == 200) {
+        final responseData = postResponse.data['user'];
+        _name = responseData['full_name'];
+        _email = responseData['email'];
+        _department = responseData['department'];
+        _registrationNumber = responseData['reg_no'];
+        _toggleEditing();
+      } else {
+        // Handle API error
+      }
     }
   }
 
@@ -134,9 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 MaterialPageRoute(builder: (_) => const QrCodeScreen()));
           } else if (index == 2) {
             Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => AttendanceHistoryScreen()));
+                context, MaterialPageRoute(builder: (_) => AttendanceHistoryScreen()));
           }
         },
       ),
@@ -146,6 +142,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const SizedBox(height: 16),
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: profilePictureURL != null
+                    ? NetworkImage(profilePictureURL!) as ImageProvider<Object>?
+                    : AssetImage('assets/placeholder.png') as ImageProvider<Object>?,
+              ),
+
               const SizedBox(height: 16),
               if (_isEditing)
                 TextFormField(
@@ -185,7 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 16),
               if (_isEditing)
                 ElevatedButton(
-                  onPressed:(){
+                  onPressed: () {
                     _saveChanges();
                   },
                   child: const Text('Save Changes'),
