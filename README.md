@@ -2,14 +2,15 @@
 
 QR Scan App is a mobile application developed for academic group projects. It simplifies the attendance-taking process for students and provides convenient features to manage profiles and view attendance history.
 
-**[Insert Project Logo or Icon Here]**
 
 ## Table of Contents
 - [Introduction](#introduction)
 - [Technologies and Frameworks](#technologies-and-frameworks)
-- [Features](#features
+- [Features](#features)
 - [Demonstration](#demonstration)
 - [Installation](#installation)
+- [Usage](#usage)
+- [Contact Information](#contact-information)
 
 
 
@@ -32,7 +33,6 @@ QR Scan App is built using the following technologies and frameworks:
 - Real-time attendance updates for lecturers.
 - Editing user profiles.
 - Viewing attendance history.
-- [Add more features here]
 
 ## Demonstration
 
@@ -52,3 +52,27 @@ git clone https://github.com/hemaka1999/universityAttendanceTest1.git
 
 # Install dependencies
 flutter pub get
+
+```
+
+## Usage
+
+To use the QR Scan App, follow these steps:
+
+1. Open the app on your mobile device.
+
+2. Create a student account or log in.
+
+3. Scan the lecturer's QR code during the lecture to mark your attendance.
+
+4. Edit your profile information.
+
+5. View your attendance history.
+
+
+## Contact Information
+
+For questions, feedback, or inquiries, please contact us at:
+
+- Email: hemaka1999@gmail.com
+- Website: [https://hemaka1999.github.io/HemakaPamodya/](https://hemaka1999.github.io/HemakaPamodya/)
