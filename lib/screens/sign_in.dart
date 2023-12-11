@@ -43,8 +43,7 @@ class _SignInScreenState extends State<SignInScreen> {
           context, // Use the context directly here
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
-
-        } catch (e) {
+      } catch (e) {
         log(e.toString());
       } catch (error) {
         // Handle generic error
@@ -73,14 +72,16 @@ class _SignInScreenState extends State<SignInScreen> {
               CircleAvatar(
                 radius: 100,
                 backgroundImage: AssetImage('assets/splash.png'),
-                backgroundColor: Colors.white,),
+                backgroundColor: Colors.white,
+              ),
               const SizedBox(height: 25.0),
               TextFormField(
                 decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.mail),
                     hintText: "Email",
                     contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10))),
                 validator: (value) {
                   if (value == null || value.isEmpty || !value.contains('@')) {
                     return 'Please enter a valid email address';
@@ -100,7 +101,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     prefixIcon: const Icon(Icons.lock_rounded),
                     hintText: "Password",
                     contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10))),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';

@@ -10,15 +10,17 @@ import '../apicalling/http.dart';
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
 
-
-
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
   // Define a list of options for the dropdown
-  List<String> departments = ['Computing & Information Systems', 'Data Science', 'Software Engineering'];
+  List<String> departments = [
+    'Computing & Information Systems',
+    'Data Science',
+    'Software Engineering'
+  ];
   String? selectedDepartment; // Store the selected department
   final _formKey = GlobalKey<FormState>();
   final apiService = ApiService();
@@ -37,11 +39,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       FirebaseAuth auth = FirebaseAuth.instance;
 
       try {
-
         final storage = FirebaseStorage.instance;
         final storageRef = storage.ref();
         final userImageRef = storageRef.child('user_images/$_email.jpg');
-
 
         if (_selectedImage != null) {
           await userImageRef.putFile(File(_selectedImage!.path));
@@ -50,13 +50,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
         final imageUrl = await userImageRef.getDownloadURL();
         print(imageUrl);
 
-
         // full_name, email, password, department, reg_no
 
-
         // Example POST request
-        final data = {'full_name':_name, 'email': _email, 'password': _password, 'department':_department, 'reg_no':_registrationNumber, 'avatar': imageUrl, };
-        final postResponse = await apiService.post('/auth/signup',null, data: data);
+        final data = {
+          'full_name': _name,
+          'email': _email,
+          'password': _password,
+          'department': _department,
+          'reg_no': _registrationNumber,
+          'avatar': imageUrl,
+        };
+        final postResponse =
+            await apiService.post('/auth/signup', null, data: data);
         if (postResponse.statusCode == 201) {
           final responseData = postResponse.data;
           // Process the response data
@@ -66,7 +72,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const SignInScreen()), // Replace with your sign-in screen class
+          MaterialPageRoute(
+              builder: (context) =>
+                  const SignInScreen()), // Replace with your sign-in screen class
         );
         // Create user account with Firebase Authentication
         // UserCredential userCredential = await auth.createUserWithEmailAndPassword(
@@ -76,34 +84,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
         //
         // User? user = userCredential.user;
         // if (user != null) {
-          // Upload image to Firebase Storage
-          // if (_selectedImage != null) {
-          //   final storageRef = FirebaseStorage.instance.ref().child('profile_pictures').child(user.uid).child('user_image.jpg');
-          //   await storageRef.putFile(File(_selectedImage!.path));
-          //   final imageUrl = await storageRef.getDownloadURL();
+        // Upload image to Firebase Storage
+        // if (_selectedImage != null) {
+        //   final storageRef = FirebaseStorage.instance.ref().child('profile_pictures').child(user.uid).child('user_image.jpg');
+        //   await storageRef.putFile(File(_selectedImage!.path));
+        //   final imageUrl = await storageRef.getDownloadURL();
 
-            // Save user data to Firestore
-            // await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-            //   'profilePictureUrl': imageUrl,
-            //   'firstName': _firstName,
-            //   'lastName': _lastName,
-            //   'department': _department,
-            //   'email': _email,
-            //   'registrationNumber': _registrationNumber,
-            //   'phoneNumber': _phoneNumber,
-            // });
+        // Save user data to Firestore
+        // await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        //   'profilePictureUrl': imageUrl,
+        //   'firstName': _firstName,
+        //   'lastName': _lastName,
+        //   'department': _department,
+        //   'email': _email,
+        //   'registrationNumber': _registrationNumber,
+        //   'phoneNumber': _phoneNumber,
+        // });
 
-            // Sign-up and data saving successful, navigate to sign-in screen
+        // Sign-up and data saving successful, navigate to sign-in screen
 
-         // }
+        // }
         //}
-      // } on FirebaseAuthException catch (e) {
+        // } on FirebaseAuthException catch (e) {
         // Handle FirebaseAuthException (e.g., display error messages)
       } catch (error) {
         // Handle other errors
       }
     }
   }
+
   void _navigateToSignIn() {
     Navigator.pushReplacement(
       context,
@@ -146,7 +155,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     prefixIcon: const Icon(Icons.person),
                     hintText: "Name",
                     contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),                validator: (value) {
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10))),
+                validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your first name';
                   }
@@ -165,13 +176,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
               //   },
               //   onChanged: (value) => _lastName = value,
               // ),
-              const SizedBox(height: 16,),
+              const SizedBox(
+                height: 16,
+              ),
               TextFormField(
                 decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.mail),
                     hintText: "Email",
                     contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),                 validator: (value) {
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10))),
+                validator: (value) {
                   if (value == null || value.isEmpty || !value.contains('@')) {
                     return 'Please enter a valid email address';
                   }
@@ -179,7 +194,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 },
                 onChanged: (value) => _email = value,
               ),
-              const SizedBox(height: 16,),
+              const SizedBox(
+                height: 16,
+              ),
               DropdownButtonFormField<String>(
                 value: selectedDepartment,
                 icon: const Icon(Icons.arrow_downward),
@@ -189,10 +206,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedDepartment = newValue;
-                    _department = newValue ?? ''; // Update the _department variable
+                    _department =
+                        newValue ?? ''; // Update the _department variable
                   });
                 },
-                items: departments.map<DropdownMenuItem<String>>((String value) {
+                items:
+                    departments.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -204,19 +223,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   }
                   return null;
                 },
-                decoration: InputDecoration(hintText: 'Department',
+                decoration: InputDecoration(
+                    hintText: 'Department',
                     prefixIcon: const Icon(Icons.cabin_outlined),
                     contentPadding: const EdgeInsets.fromLTRB(20, 15, 0, 15),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10))),
               ),
-              const SizedBox(height: 16,),
+              const SizedBox(
+                height: 16,
+              ),
 
               TextFormField(
                 decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.numbers_outlined),
                     hintText: "Registration Number",
                     contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10))),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your registration number';
@@ -235,13 +259,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
               //   },
               //   onChanged: (value) => _phoneNumber = value,
               // ),
-              const SizedBox(height: 16,),
+              const SizedBox(
+                height: 16,
+              ),
               TextFormField(
                 decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.lock_rounded),
                     hintText: "Password",
                     contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10))),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -252,13 +279,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 onChanged: (value) => _password = value,
               ),
 
-              const SizedBox(height: 16,),
+              const SizedBox(
+                height: 16,
+              ),
               TextFormField(
                 decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.lock_rounded),
                     hintText: "Confirm Password",
                     contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10))),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty || value != _password) {
@@ -268,7 +298,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 },
                 onChanged: (value) => _confirmPassword = value,
               ),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               ElevatedButton(
                 onPressed: _signUp,
                 child: const Text('Sign Up'),
