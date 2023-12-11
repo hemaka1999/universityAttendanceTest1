@@ -1,16 +1,16 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:profile5/screens/signIn.dart';
+import 'package:profile5/screens/sign_in.dart';
 
 import '../apicalling/http.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
+
+
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -18,7 +18,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   // Define a list of options for the dropdown
-  List<String> departments = ['Department A', 'Department B', 'Department C'];
+  List<String> departments = ['Computing & Information Systems', 'Data Science', 'Software Engineering'];
   String? selectedDepartment; // Store the selected department
   final _formKey = GlobalKey<FormState>();
   final apiService = ApiService();
@@ -41,6 +41,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         final storage = FirebaseStorage.instance;
         final storageRef = storage.ref();
         final userImageRef = storageRef.child('user_images/$_email.jpg');
+
 
         if (_selectedImage != null) {
           await userImageRef.putFile(File(_selectedImage!.path));
@@ -103,6 +104,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     }
   }
+  void _navigateToSignIn() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const SignInScreen()),
+    );
+  }
 
   void _pickImage() async {
     final picker = ImagePicker();
@@ -132,9 +139,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ? Image.file(File(_selectedImage!.path))
                   : Container(),
 
+              const SizedBox(height: 16),
+
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Name'),
-                validator: (value) {
+                decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.person),
+                    hintText: "Name",
+                    contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),                validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your first name';
                   }
@@ -153,9 +165,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               //   },
               //   onChanged: (value) => _lastName = value,
               // ),
+              const SizedBox(height: 16,),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) {
+                decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.mail),
+                    hintText: "Email",
+                    contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),                 validator: (value) {
                   if (value == null || value.isEmpty || !value.contains('@')) {
                     return 'Please enter a valid email address';
                   }
@@ -163,18 +179,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 },
                 onChanged: (value) => _email = value,
               ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Department'),
+              const SizedBox(height: 16,),
+              DropdownButtonFormField<String>(
+                value: selectedDepartment,
+                icon: const Icon(Icons.arrow_downward),
+                iconSize: 24,
+                elevation: 10,
+                style: const TextStyle(color: Colors.deepPurple),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedDepartment = newValue;
+                    _department = newValue ?? ''; // Update the _department variable
+                  });
+                },
+                items: departments.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your department';
+                    return 'Please select a department';
                   }
                   return null;
                 },
-                onChanged: (value) => _department = value,
+                decoration: InputDecoration(hintText: 'Department',
+                    prefixIcon: const Icon(Icons.cabin_outlined),
+                    contentPadding: const EdgeInsets.fromLTRB(20, 15, 0, 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
               ),
+              const SizedBox(height: 16,),
+
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Registration Number'),
+                decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.numbers_outlined),
+                    hintText: "Registration Number",
+                    contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your registration number';
@@ -193,8 +235,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               //   },
               //   onChanged: (value) => _phoneNumber = value,
               // ),
+              const SizedBox(height: 16,),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.lock_rounded),
+                    hintText: "Password",
+                    contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -204,8 +251,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 },
                 onChanged: (value) => _password = value,
               ),
+
+              const SizedBox(height: 16,),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Confirm Password'),
+                decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.lock_rounded),
+                    hintText: "Confirm Password",
+                    contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty || value != _password) {
@@ -215,9 +268,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 },
                 onChanged: (value) => _confirmPassword = value,
               ),
+              const SizedBox(height: 20,),
               ElevatedButton(
                 onPressed: _signUp,
                 child: const Text('Sign Up'),
+              ),
+              TextButton(
+                onPressed: _navigateToSignIn,
+                child: const Text("Already have an account? Login"),
               ),
             ],
           ),

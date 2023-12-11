@@ -1,19 +1,13 @@
-import 'dart:convert';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:profile5/screens/profileScreen.dart';
-import 'package:profile5/screens/signUp.dart';
+import 'package:profile5/screens/home_screeen.dart';
+import 'package:profile5/screens/sign_up.dart';
 import 'dart:developer';
 import 'package:profile5/jwtoken/jwtoken.dart';
 
 import '../apicalling/http.dart';
 
-
-
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
-
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -26,18 +20,13 @@ class _SignInScreenState extends State<SignInScreen> {
   String _email = '';
   String _password = '';
 
-
   Future<void> _signIn(String email, String password) async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       try {
-        // await FirebaseAuth.instance.signInWithEmailAndPassword(
-        //   email: email,
-        //   password: password,
-        //   );
-
         // Example POST request
         final data = {'email': email, 'password': password};
-        final postResponse = await apiService.post('/auth/signin',null, data: data);
+        final postResponse =
+            await apiService.post('/auth/signin', null, data: data);
         if (postResponse.statusCode == 200) {
           final responseData = postResponse.data;
           // final decodedData = jsonDecode(responseData); // Convert to a Map
@@ -49,17 +38,13 @@ class _SignInScreenState extends State<SignInScreen> {
           // Handle errors
         }
 
-
         // Navigate to the profile screen after successful sign-in
         Navigator.pushReplacement(
           context, // Use the context directly here
-          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+          MaterialPageRoute(builder: (context) => HomeScreen()),
         );
 
-        // Successful sign-in, navigate to the next screen
-        // For example:
-        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-      }  catch (e) {
+        } catch (e) {
         log(e.toString());
       } catch (error) {
         // Handle generic error
@@ -67,9 +52,8 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-
   void _navigateToSignUp() {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const SignUpScreen()),
     );
@@ -85,8 +69,18 @@ class _SignInScreenState extends State<SignInScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              const SizedBox(height: 16),
+              CircleAvatar(
+                radius: 100,
+                backgroundImage: AssetImage('assets/splash.png'),
+                backgroundColor: Colors.white,),
+              const SizedBox(height: 25.0),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.mail),
+                    hintText: "Email",
+                    contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                 validator: (value) {
                   if (value == null || value.isEmpty || !value.contains('@')) {
                     return 'Please enter a valid email address';
@@ -101,8 +95,12 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
               const SizedBox(height: 16.0),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
+                decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.lock_rounded),
+                    hintText: "Password",
+                    contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your password';
@@ -120,7 +118,6 @@ class _SignInScreenState extends State<SignInScreen> {
                 onPressed: () async {
                   await _signIn(_email.trim(), _password);
                 },
-
                 child: const Text('Sign In'),
               ),
               TextButton(

@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:profile5/screens/QRCodeScreen.dart';
-import 'package:profile5/screens/profileScreen.dart';
-import 'package:profile5/screens/signIn.dart';
+import 'package:profile5/screens/qrscan_screen.dart';
+import 'package:profile5/screens/profile_screen.dart';
+import 'package:profile5/screens/sign_in.dart';
 import 'package:profile5/screens/splash_screen.dart';
 
 void main() async {
@@ -18,18 +18,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, 
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
       home: const SplashScreen(),

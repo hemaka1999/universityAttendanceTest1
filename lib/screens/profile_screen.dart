@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:profile5/screens/QRCodeScreen.dart';
-import 'package:profile5/screens/attendanceHistoryScreen.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:profile5/screens/signIn.dart';
+import 'package:profile5/screens/sign_in.dart';
 
 import '../apicalling/http.dart';
 import '../jwtoken/jwtoken.dart';
@@ -46,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final currentUser = await tokenjwt.getCurrentUser();
       if (currentUser != null) {
         final postResponse =
-        await apiService.get('/user/profile', currentUser['token']);
+            await apiService.get('/user/profile', currentUser['token']);
         if (postResponse.statusCode == 200) {
           final responseData = postResponse.data['user'];
           setState(() {
@@ -82,8 +80,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'avatar': profilePictureURL,
       };
 
-      final postResponse =
-      await apiService.put('/user/profile', currentUser?['token'], data: data);
+      final postResponse = await apiService
+          .put('/user/profile', currentUser?['token'], data: data);
 
       if (postResponse.statusCode == 200) {
         final responseData = postResponse.data['user'];
@@ -110,32 +108,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code),
-            label: 'QR Code',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (_) => const QrCodeScreen()));
-          } else if (index == 2) {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (_) => AttendanceHistoryScreen()));
-          }
-        },
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Center(
@@ -147,9 +119,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 radius: 50,
                 backgroundImage: profilePictureURL != null
                     ? NetworkImage(profilePictureURL!) as ImageProvider<Object>?
-                    : AssetImage('assets/placeholder.png') as ImageProvider<Object>?,
+                    : AssetImage('assets/placeholder.png')
+                        as ImageProvider<Object>?,
               ),
-
               const SizedBox(height: 16),
               if (_isEditing)
                 TextFormField(
@@ -163,8 +135,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (_isEditing)
                 TextFormField(
                   initialValue: _registrationNumber,
-                  decoration: const InputDecoration(labelText: 'Registration Number'),
-                  onChanged: (value) => setState(() => _registrationNumber = value),
+                  decoration:
+                      const InputDecoration(labelText: 'Registration Number'),
+                  onChanged: (value) =>
+                      setState(() => _registrationNumber = value),
                 )
               else
                 Text('Registration Number: $_registrationNumber'),

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:profile5/screens/signIn.dart';
+import 'package:profile5/screens/sign_in.dart';
 
 void main(){runApp(const MaterialApp(home: SplashScreen()));}
 
