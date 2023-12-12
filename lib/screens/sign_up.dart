@@ -70,12 +70,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           // Handle errors
         }
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  const SignInScreen()), // Replace with your sign-in screen class
-        );
         // Create user account with Firebase Authentication
         // UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         //   email: _email,
@@ -133,7 +127,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign Up')),
+      appBar: AppBar(
+          title: const Text('Sign Up'),
+        leading: IconButton(
+          icon: const Icon(Icons.home),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const SignInScreen()),
+            );
+          },
+        ),
+      ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(

@@ -39,7 +39,7 @@ class _SignInScreenState extends State<SignInScreen> {
         }
 
         // Navigate to the profile screen after successful sign-in
-        Navigator.pushReplacement(
+        Navigator.push(
           context, // Use the context directly here
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
