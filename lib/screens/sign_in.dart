@@ -26,7 +26,7 @@ class _SignInScreenState extends State<SignInScreen> {
         // Example POST request
         final data = {'email': email, 'password': password};
         final postResponse =
-            await apiService.post('/auth/signin', null, data: data);
+        await apiService.post('/auth/signin', null, data: data);
         if (postResponse.statusCode == 200) {
           final responseData = postResponse.data;
           // final decodedData = jsonDecode(responseData); // Convert to a Map
@@ -40,7 +40,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
         // Navigate to the profile screen after successful sign-in
         Navigator.push(
-          context, // Use the context directly here
+          context,
           MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       } catch (e) {

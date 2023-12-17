@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:profile5/screens/profile_screen.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../apicalling/http.dart';
 import '../jwtoken/jwtoken.dart';
+import 'home_screeen.dart';
 
 class QrCodeScreen extends StatefulWidget {
   const QrCodeScreen({Key? key}) : super(key: key);
@@ -29,12 +31,20 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
     userId = FirebaseAuth.instance.currentUser?.uid ?? '';
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('QR Code Scanner'),
+        leading: IconButton(
+          icon: const Icon(Icons.home),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          },
+        ),
       ),
       body: Column(
         children: [
@@ -46,7 +56,7 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
                 this.controller = controller;
                 controller.scannedDataStream.listen((scanData) async {
                   final List<dynamic> decodedData =
-                      jsonDecode(scanData.code.toString());
+                  jsonDecode(scanData.code.toString());
                   print(decodedData);
 
                   if (decodedData.length == 2) {

@@ -49,6 +49,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         final imageUrl = await userImageRef.getDownloadURL();
         print(imageUrl);
+        Navigator.push(context, MaterialPageRoute(
+            builder: (context)=>SignInScreen()
+        )
+        );
 
         // full_name, email, password, department, reg_no
 
@@ -62,7 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           'avatar': imageUrl,
         };
         final postResponse =
-            await apiService.post('/auth/signup', null, data: data);
+        await apiService.post('/auth/signup', null, data: data);
         if (postResponse.statusCode == 201) {
           final responseData = postResponse.data;
           // Process the response data
@@ -128,7 +132,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Sign Up'),
+        title: const Text('Sign Up'),
         leading: IconButton(
           icon: const Icon(Icons.home),
           onPressed: () {
@@ -156,6 +160,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 16),
 
               TextFormField(
+                textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.person),
                     hintText: "Name",
@@ -185,6 +190,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 height: 16,
               ),
               TextFormField(
+                textCapitalization: TextCapitalization.none,
                 decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.mail),
                     hintText: "Email",
@@ -216,7 +222,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   });
                 },
                 items:
-                    departments.map<DropdownMenuItem<String>>((String value) {
+                departments.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),

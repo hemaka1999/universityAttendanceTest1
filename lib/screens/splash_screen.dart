@@ -31,15 +31,15 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-              child: Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-           Container(
+            Container(
               width: 200, // Adjust the width as needed
               height: 200, // Adjust the height as needed
-            child: Image.asset('assets/splash.png'), ),// Replace with your logo image path
+              child: Image.asset('assets/splash.png'), ),// Replace with your logo image path
             SizedBox(height: 20), // Add spacing between the logo and other elements if needed
-            
+
           ],
         ),
       ),

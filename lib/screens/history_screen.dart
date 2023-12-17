@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:profile5/screens/home_screeen.dart';
+import 'package:profile5/screens/profile_screen.dart';
 import '../apicalling/http.dart';
 import '../jwtoken/jwtoken.dart';
 
@@ -13,50 +14,56 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   final apiService = ApiService();
   final tokenjwt = TokenJWT();
 
-  String? _course;
+  String _userId = '';
+  String _course = '';
 
   List data = [];
 
-  // Sample data for demonstration purposes. You should replace this with actual data from your database.
   final List<AttendanceData> attendanceDataList = [
     AttendanceData(
       lectureDateTime:
-          DateTime(2023, 9, 15, 10, 0), // Replace with actual date and time
+      DateTime(2023, 9, 15, 10, 0), // Replace with actual date and time
       hall: 'Hall A', // Replace with actual hall name
       firstVerification: true,
       secondVerification: true,
     ),
-    // Add more attendance data entries here
   ];
 
   @override
   void initState() {
     super.initState();
     fetchData();
+    //print(_course);
   }
 
   Future<void> fetchData() async {
     try {
       final currentUser = await tokenjwt.getCurrentUser();
+      print(currentUser);
       if (currentUser != null) {
-        final postResponse =
-            await apiService.get('/courses', currentUser['token']);
+        final postResponse = await apiService.get(
+          '/attendance/history/$_userId/$_course',
+          currentUser['token'],
+        );
+        print(_course);
+
         if (postResponse.statusCode == 200) {
-          final responseData = postResponse.data['courses'];
+          final responseData = postResponse.data['attendance'];
           setState(() {
-            _course = responseData['name'];
+            data =
+                responseData; // Assuming 'attendanceHistory' is the correct key
           });
-          print(responseData);
         } else {
+          print(_course);
           // Handle API error
         }
       }
     } catch (e) {
+      print(e.toString());
       // Handle exceptions
     }
   }
 
-  // Dropdown menu items for course selection
   List<String> courseList = ['Course A', 'Course B', 'Course C'];
   String selectedCourse = 'Course A';
 
@@ -65,6 +72,15 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Attendance History'),
+        leading: IconButton(
+          icon: const Icon(Icons.home),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          },
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
