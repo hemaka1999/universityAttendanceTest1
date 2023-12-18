@@ -48,6 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _registrationNumber = responseData['reg_no'];
             profilePictureURL = responseData['avatar'];
           });
+         // print(responseData);
         } else {
           // Handle API error
         }
@@ -64,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _logout() async {
-    Navigator.push(
+    Navigator.pop(
       context,
       MaterialPageRoute(builder: (context) => const SignInScreen()),
     );
@@ -177,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 else
                   Text(
                     'Department: $_department',
-                    style: TextStyle(fontSize: 17),
+                    style: TextStyle(fontSize: 18),
                   ),
                 const SizedBox(height: 25),
                 if (_isEditing)

@@ -17,9 +17,9 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   // Define a list of options for the dropdown
   List<String> departments = [
-    'Computing & Information Systems',
-    'Data Science',
-    'Software Engineering'
+    'CIS',
+    'DS',
+    'SE'
   ];
   String? selectedDepartment; // Store the selected department
   final _formKey = GlobalKey<FormState>();
@@ -56,7 +56,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         // full_name, email, password, department, reg_no
 
-        // Example POST request
         final data = {
           'full_name': _name,
           'email': _email,
@@ -112,7 +111,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _navigateToSignIn() {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SignInScreen()),
     );
@@ -134,9 +133,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       appBar: AppBar(
         title: const Text('Sign Up'),
         leading: IconButton(
-          icon: const Icon(Icons.home),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SignInScreen()),
             );

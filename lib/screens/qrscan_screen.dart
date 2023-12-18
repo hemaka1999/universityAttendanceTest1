@@ -1,10 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:profile5/screens/profile_screen.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 import '../apicalling/http.dart';
 import '../jwtoken/jwtoken.dart';
@@ -23,13 +21,9 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
   final tokenjwt = TokenJWT();
   late QRViewController controller;
   late String userId;
-  bool attendanceMarked = false; // Flag to track attendance marking
+  bool attendanceMarked = false;
 
-  @override
-  void initState() {
-    super.initState();
-    userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-  }
+
 
   @override
   Widget build(BuildContext context) {

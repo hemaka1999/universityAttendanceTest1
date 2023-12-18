@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:profile5/screens/home_screeen.dart';
-import 'package:profile5/screens/profile_screen.dart';
 import '../apicalling/http.dart';
 import '../jwtoken/jwtoken.dart';
 
@@ -14,58 +13,70 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   final apiService = ApiService();
   final tokenjwt = TokenJWT();
 
-  String _userId = '';
-  String _course = '';
-
-  List data = [];
-
-  final List<AttendanceData> attendanceDataList = [
-    AttendanceData(
-      lectureDateTime:
-      DateTime(2023, 9, 15, 10, 0), // Replace with actual date and time
-      hall: 'Hall A', // Replace with actual hall name
-      firstVerification: true,
-      secondVerification: true,
-    ),
+  int _courseId = 0;
+  List<Course> courseList = [
+    Course(id: 1, name: 'RAD'),
+    Course(id: 2, name: 'SE'),
+    Course(id: 3, name: 'ADBMS'),
   ];
+
+  Course? _selectedCourse;
+
+  List<AttendanceData> attendanceDataList = [];
 
   @override
   void initState() {
     super.initState();
-    fetchData();
-    //print(_course);
   }
 
   Future<void> fetchData() async {
     try {
       final currentUser = await tokenjwt.getCurrentUser();
-      print(currentUser);
       if (currentUser != null) {
+        int userId = currentUser['id'];
         final postResponse = await apiService.get(
-          '/attendance/history/$_userId/$_course',
+          '/attendance/history/$userId/$_courseId',
           currentUser['token'],
         );
-        print(_course);
 
         if (postResponse.statusCode == 200) {
-          final responseData = postResponse.data['attendance'];
-          setState(() {
-            data =
-                responseData; // Assuming 'attendanceHistory' is the correct key
-          });
+          final responseData = postResponse.data['attendanceHistory'];
+          if (responseData != null && responseData.isNotEmpty) {
+            // Clear previous attendance data
+            setState(() {
+              attendanceDataList = [];
+            });
+
+            for (var attendance in responseData) {
+              DateTime dateandtime =
+                  DateTime.parse(attendance['date_time']) ?? DateTime.now();
+              String hall = attendance['hall'] ?? 'No Hall';
+              bool v1 = attendance['verification_one'] ?? false;
+              bool v2 = attendance['verification_two'] ?? false;
+
+              setState(() {
+                attendanceDataList.add(AttendanceData(
+                  lectureDateTime: dateandtime,
+                  hall: hall,
+                  firstVerification: v1,
+                  secondVerification: v2,
+                ));
+              });
+            }
+          } else {
+            // If no attendance data is found, clear the list
+            setState(() {
+              attendanceDataList = [];
+            });
+          }
         } else {
-          print(_course);
-          // Handle API error
+          print('Error: ${postResponse.statusCode}');
         }
       }
     } catch (e) {
       print(e.toString());
-      // Handle exceptions
     }
   }
-
-  List<String> courseList = ['Course A', 'Course B', 'Course C'];
-  String selectedCourse = 'Course A';
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +86,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
         leading: IconButton(
           icon: const Icon(Icons.home),
           onPressed: () {
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => HomeScreen()),
             );
@@ -87,49 +98,54 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DropdownButtonFormField<String>(
-              value: _course,
-              items: data.map((list) {
-                return DropdownMenuItem<String>(
-                  child: Text(list['name']),
-                  value: list['id'].toString(),
+            DropdownButtonFormField<Course>(
+              value: _selectedCourse,
+              items: courseList.map((course) {
+                return DropdownMenuItem<Course>(
+                  child: Text(course.name),
+                  value: course,
                 );
               }).toList(),
-              onChanged: (String? newValue) {
+              onChanged: (Course? newValue) async {
                 setState(() {
-                  _course = newValue!;
-                  // Fetch attendance data for the selected course from your database here
+                  _selectedCourse = newValue;
+                  _courseId = newValue?.id ?? 0;
                 });
+                // Trigger API call when the user selects a course
+                await fetchData();
               },
             ),
             SizedBox(height: 16.0),
             Text(
-              'Attendance Details for $selectedCourse', // Display the selected course
+              'Attendance Details for Course ID: $_courseId',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16.0),
-            Expanded(
-              child: ListView.builder(
-                itemCount: attendanceDataList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final attendanceData = attendanceDataList[index];
-                  return ListTile(
-                    title: Text(
-                        'Lecture Date & Time: ${attendanceData.lectureDateTime}'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Lecture Hall: ${attendanceData.hall}'),
-                        Text(
-                            'First Verification: ${attendanceData.firstVerification ? 'True' : 'False'}'),
-                        Text(
-                            'Second Verification: ${attendanceData.secondVerification ? 'True' : 'False'}'),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+            if (attendanceDataList.isNotEmpty)
+              Expanded(
+                child: ListView.builder(
+                  itemCount: attendanceDataList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final attendanceData = attendanceDataList[index];
+                    return ListTile(
+                      title: Text(
+                          'Lecture Date & Time: ${attendanceData.lectureDateTime}'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Lecture Hall: ${attendanceData.hall}'),
+                          Text(
+                              'First Verification: ${attendanceData.firstVerification}'),
+                          Text(
+                              'Second Verification: ${attendanceData.secondVerification}'),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              )
+            else
+              Text('Attendance not found.'),
           ],
         ),
       ),
@@ -148,5 +164,15 @@ class AttendanceData {
     required this.hall,
     required this.firstVerification,
     required this.secondVerification,
+  });
+}
+
+class Course {
+  final int id;
+  final String name;
+
+  Course({
+    required this.id,
+    required this.name,
   });
 }
